@@ -4,6 +4,7 @@ import { ChevronDown, Cpu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -39,8 +40,8 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
         <ChevronDown className="w-3 h-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        {Object.entries(grouped).map(([provider, models]) => (
-          <div key={provider}>
+        {Object.entries(grouped).map(([provider, models], i, arr) => (
+          <DropdownMenuGroup key={provider}>
             <DropdownMenuLabel className="text-xs text-muted-foreground">{provider}</DropdownMenuLabel>
             {models.map((model) => (
               <DropdownMenuItem
@@ -59,8 +60,8 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                 <span className="text-xs text-muted-foreground">{model.description}</span>
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-          </div>
+            {i < arr.length - 1 && <DropdownMenuSeparator />}
+          </DropdownMenuGroup>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

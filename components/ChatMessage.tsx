@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Message, Artifact } from "@/lib/types";
 import { CodeBlock } from "./CodeBlock";
+import { InteractiveChoiceCard, parseChoiceCard, stripChoiceBlocks } from "./InteractiveChoiceCard";
 import { cn } from "@/lib/utils";
 
 interface ChatMessageProps {
@@ -23,6 +24,7 @@ interface ChatMessageProps {
   isDark: boolean;
   onOpenArtifact?: (artifact: Artifact) => void;
   onRegenerate?: () => void;
+  onOptionSelect?: (choice: string) => void;
 }
 
 /* Pulsing dots while assistant is "thinking" */
@@ -52,7 +54,7 @@ function ClaudeMark() {
   );
 }
 
-export function ChatMessage({ message, isDark, onOpenArtifact, onRegenerate }: ChatMessageProps) {
+export function ChatMessage({ message, isDark, onOpenArtifact, onRegenerate, onOptionSelect }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState<boolean | null>(null);
 
@@ -119,6 +121,8 @@ export function ChatMessage({ message, isDark, onOpenArtifact, onRegenerate }: C
                 code({ className, children, ...props }) {
                   const match = /language-(\w+)/.exec(className || "");
                   const codeStr = String(children).replace(/\n$/, "");
+                  // hide the raw options block — rendered as a card below
+                  if (match?.[1] === "options") return null;
                   if (match) {
                     return (
                       <CodeBlock code={codeStr} language={match[1]} isDark={isDark} />
@@ -185,10 +189,24 @@ export function ChatMessage({ message, isDark, onOpenArtifact, onRegenerate }: C
                 ),
               }}
             >
-              {message.content}
+              {stripChoiceBlocks(message.content)}
             </ReactMarkdown>
           </div>
         )}
+
+        {/* Interactive choice card — rendered when Claude emits an ```options block */}
+        {!message.isStreaming && (() => {
+          const card = parseChoiceCard(message.content);
+          if (!card || !onOptionSelect) return null;
+          return (
+            <InteractiveChoiceCard
+              key={message.id + "-card"}
+              question={card.question}
+              choices={card.choices}
+              onSelect={onOptionSelect}
+            />
+          );
+        })()}
 
         {/* Artifact preview card */}
         {message.artifact && onOpenArtifact && !message.isStreaming && (

@@ -5,6 +5,7 @@ import { Wrench, Globe, Terminal, FileText, Image, BarChart2, ChevronDown, Check
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuLabel,
@@ -43,6 +44,7 @@ export function ToolSelector({ enabledTools, onToggle }: ToolSelectorProps) {
         <ChevronDown className="w-3 h-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuGroup>
         <DropdownMenuLabel className="text-xs text-muted-foreground">Available Tools</DropdownMenuLabel>
         {TOOLS.map((tool) => {
           const Icon = iconMap[tool.icon] || Wrench;
@@ -64,6 +66,7 @@ export function ToolSelector({ enabledTools, onToggle }: ToolSelectorProps) {
             </DropdownMenuItem>
           );
         })}
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

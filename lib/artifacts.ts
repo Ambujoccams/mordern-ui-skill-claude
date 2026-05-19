@@ -6,13 +6,16 @@ import { Artifact } from "./types";
  * Returns undefined for plain conversational replies.
  */
 export function extractArtifact(content: string): Artifact | undefined {
+  // Strip interactive-choice blocks so they are never treated as code artifacts
+  const stripped = content.replace(/```options\s*\n[\s\S]+?```/g, "");
+
   // ── 1. Code block ────────────────────────────────────────────────────────
   // Match the *largest* fenced code block present
   const codeRegex = /```(\w[\w-]*)\n([\s\S]+?)```/g;
   let bestCode: { lang: string; body: string } | null = null;
 
   let match: RegExpExecArray | null;
-  while ((match = codeRegex.exec(content)) !== null) {
+  while ((match = codeRegex.exec(stripped)) !== null) {
     const [, lang, body] = match;
     if (!bestCode || body.length > bestCode.body.length) {
       bestCode = { lang: lang.toLowerCase(), body: body.trimEnd() };
@@ -20,7 +23,7 @@ export function extractArtifact(content: string): Artifact | undefined {
   }
 
   if (bestCode && bestCode.body.split("\n").length >= 4) {
-    const title = guessCodeTitle(bestCode.lang, content);
+    const title = guessCodeTitle(bestCode.lang, stripped);
     return {
       type: "code",
       title,
@@ -30,15 +33,14 @@ export function extractArtifact(content: string): Artifact | undefined {
   }
 
   // ── 2. Data table ─────────────────────────────────────────────────────────
-  const tableLines = content
+  const tableLines = stripped
     .split("\n")
     .filter((l) => l.trim().startsWith("|") && l.trim().endsWith("|"));
 
   if (tableLines.length >= 3) {
-    // Extract everything from the first table line onward
-    const tableStart = content.indexOf(tableLines[0]);
-    const tableBlock = content.slice(tableStart);
-    const title = guessDocTitle(content) || "Data Table";
+    const tableStart = stripped.indexOf(tableLines[0]);
+    const tableBlock = stripped.slice(tableStart);
+    const title = guessDocTitle(stripped) || "Data Table";
     return {
       type: "data",
       title,
@@ -47,15 +49,15 @@ export function extractArtifact(content: string): Artifact | undefined {
   }
 
   // ── 3. Structured document ────────────────────────────────────────────────
-  const h2Count = (content.match(/^##\s+/gm) || []).length;
-  const wordCount = content.split(/\s+/).length;
+  const h2Count = (stripped.match(/^##\s+/gm) || []).length;
+  const wordCount = stripped.split(/\s+/).length;
 
   if (h2Count >= 2 && wordCount >= 120) {
-    const title = guessDocTitle(content) || "Document";
+    const title = guessDocTitle(stripped) || "Document";
     return {
       type: "document",
       title,
-      content: content.trim(),
+      content: stripped.trim(),
     };
   }
 

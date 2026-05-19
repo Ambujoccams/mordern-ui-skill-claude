@@ -12,6 +12,7 @@ interface ChatWindowProps {
   onOpenArtifact: (artifact: Artifact) => void;
   onSuggestedPrompt: (prompt: string) => void;
   onRegenerate: () => void;
+  onOptionSelect: (choice: string) => void;
 }
 
 export function ChatWindow({
@@ -20,6 +21,7 @@ export function ChatWindow({
   onOpenArtifact,
   onSuggestedPrompt,
   onRegenerate,
+  onOptionSelect,
 }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +42,7 @@ export function ChatWindow({
                 message={msg}
                 isDark={isDark}
                 onOpenArtifact={onOpenArtifact}
+                onOptionSelect={onOptionSelect}
                 onRegenerate={i === messages.length - 1 ? onRegenerate : undefined}
               />
             ))}

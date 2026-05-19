@@ -234,6 +234,12 @@ export default function Home() {
     [doSubmit]
   );
 
+  // Called when user clicks a choice inside an InteractiveChoiceCard
+  const handleOptionSelect = useCallback(
+    (choice: string) => doSubmit(choice),
+    [doSubmit]
+  );
+
   const handleRegenerate = useCallback(async () => {
     if (isLoading) return;
     const lastUser = [...messagesRef.current]
@@ -318,6 +324,7 @@ export default function Home() {
               onOpenArtifact={handleOpenArtifact}
               onSuggestedPrompt={handleSuggestedPrompt}
               onRegenerate={handleRegenerate}
+              onOptionSelect={handleOptionSelect}
             />
             <PromptInput
               value={input}

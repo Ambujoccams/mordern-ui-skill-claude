@@ -26,52 +26,6 @@ import { cn } from "@/lib/utils";
 
 const PREVIEWABLE_LANGS = new Set(["tsx", "jsx", "html", "js", "javascript", "ts", "typescript"]);
 
-// ── Streaming content parser ──────────────────────────────────────────────
-// Splits raw streaming text into a prose portion (before the first code fence)
-// and the code being streamed inside that fence.
-function parseStreamingParts(content: string): {
-  prose: string;
-  lang: string;
-  code: string | null;
-} {
-  const openMatch = content.match(/```(\w[\w-]*)?\n?/);
-  if (!openMatch || openMatch.index === undefined) {
-    return { prose: content, lang: "", code: null };
-  }
-  const prose = content.slice(0, openMatch.index).trimEnd();
-  const lang = (openMatch[1] ?? "").toLowerCase();
-  const afterOpen = content.slice(openMatch.index + openMatch[0].length);
-  // Strip trailing closing fence if it arrived already
-  const code = afterOpen.replace(/\n```\s*$/, "");
-  return { prose, lang, code };
-}
-
-// ── Streaming code block ──────────────────────────────────────────────────
-// Reuses CodeBlock so streaming code has the same syntax highlighting, header,
-// and copy button as final code. A small live indicator replaces the language
-// label so the user knows it's still updating.
-function StreamingCodeBlock({ lang, code, isDark }: { lang: string; code: string; isDark: boolean }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="mt-3 relative"
-    >
-      <CodeBlock code={code || " "} language={lang || "text"} isDark={isDark} />
-      {/* Live-streaming indicator — pulsing dot in the header */}
-      <div className="absolute top-2.5 right-[72px] flex items-center gap-1.5 pointer-events-none">
-        <motion.span
-          className="w-1.5 h-1.5 rounded-full bg-primary"
-          animate={{ opacity: [0.4, 1, 0.4], scale: [0.85, 1.1, 0.85] }}
-          transition={{ duration: 1.1, repeat: Infinity }}
-        />
-        <span className="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">live</span>
-      </div>
-    </motion.div>
-  );
-}
-
 // ── Table normalizer ──────────────────────────────────────────────────────
 // Fixes two common Claude table formats that remark-gfm can't parse:
 //   1. Separator lines using + instead of |  e.g. "---+---+---"
@@ -126,7 +80,7 @@ const ARTIFACT_ICON: Record<string, React.ReactNode> = {
   preview:  <Globe className="w-3.5 h-3.5" />,
 };
 
-function ArtifactCard({ artifact, onOpen }: { artifact: Artifact; onOpen: (a: Artifact) => void }) {
+function ArtifactCard({ artifact, onOpen, isDark }: { artifact: Artifact; onOpen: (a: Artifact) => void; isDark: boolean }) {
   const [rendered, setRendered] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(320);
@@ -154,7 +108,7 @@ function ArtifactCard({ artifact, onOpen }: { artifact: Artifact; onOpen: (a: Ar
       initial={{ opacity: 0, y: 12, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-      className="mt-3 rounded-2xl bg-white overflow-hidden w-full"
+      className="mt-3 rounded-2xl bg-card overflow-hidden w-full"
     >
       {/* ── Live preview iframe ── */}
       {isPreviewable && (
@@ -169,7 +123,7 @@ function ArtifactCard({ artifact, onOpen }: { artifact: Artifact; onOpen: (a: Ar
             ref={iframeRef}
             srcDoc={html!}
             sandbox="allow-scripts"
-            className="w-full border-0 bg-[#faf7f2] block"
+            className="w-full border-0 bg-background block"
             style={{ height: iframeHeight }}
             title="Preview"
             initial={{ opacity: 0 }}
@@ -180,7 +134,7 @@ function ArtifactCard({ artifact, onOpen }: { artifact: Artifact; onOpen: (a: Ar
       )}
 
       {/* ── Footer toolbar ── */}
-      <div className="flex items-center gap-2 px-3.5 py-2 bg-[oklch(0.972_0.008_74)]">
+      <div className="flex items-center gap-2 px-3.5 py-2 bg-muted/40">
         <span className="text-muted-foreground/45 shrink-0">
           {ARTIFACT_ICON[artifact.type] ?? <Code2 className="w-3.5 h-3.5" />}
         </span>
@@ -220,11 +174,11 @@ function ArtifactCard({ artifact, onOpen }: { artifact: Artifact; onOpen: (a: Ar
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden border-t border-border/50"
           >
-            <div className="p-3 bg-[oklch(0.965_0.008_74)] max-h-72 overflow-y-auto">
+            <div className="p-3 bg-muted max-h-72 overflow-y-auto">
               <CodeBlock
                 code={artifact.content}
                 language={artifact.language ?? "tsx"}
-                isDark={false}
+                isDark={isDark}
                 showHeader={false}
               />
             </div>
@@ -287,7 +241,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isDark, onOpenAr
       >
         <div className="max-w-[75%] flex flex-col items-end gap-1">
           {/* Warm cream bubble — like Claude's user message */}
-          <div className="bg-[oklch(0.93_0.022_74)] border border-[oklch(0.875_0.022_72)] rounded-2xl rounded-br-md px-4 py-3 text-[14.5px] leading-relaxed text-foreground">
+          <div className="bg-accent border border-border rounded-2xl rounded-br-md px-4 py-3 text-[14.5px] leading-relaxed text-foreground">
             <p className="whitespace-pre-wrap">{message.content}</p>
           </div>
           {/* Edit action on hover */}
@@ -321,46 +275,6 @@ export const ChatMessage = memo(function ChatMessage({ message, isDark, onOpenAr
 
         {message.isStreaming && !message.content ? (
           <StreamingDots />
-        ) : message.isStreaming ? (
-          /* Streaming render:
-             - Prose (before first ```) → ReactMarkdown on the short slice, cheap.
-             - Code (from first ``` onward) → StreamingCodeBlock with live cursor.
-             - No raw fence characters ever appear in the UI. */
-          <div className="text-[14.5px] leading-relaxed text-foreground prose-sm">
-            {(() => {
-              const { prose, lang, code } = parseStreamingParts(message.content);
-              return (
-                <>
-                  {prose && (
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        p: ({ children }) => <p className="mb-3 last:mb-0 text-foreground/90">{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-1 text-foreground/90">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 space-y-1 text-foreground/90">{children}</ol>,
-                        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                        h1: ({ children }) => <h1 className="text-xl font-bold mb-3 mt-2 text-foreground">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-base font-semibold mb-2 mt-4 text-foreground">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-sm font-semibold mb-1.5 mt-3 text-foreground">{children}</h3>,
-                        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                        a: ({ children, href }) => <a href={href} className="text-primary underline underline-offset-2 hover:text-primary/80">{children}</a>,
-                      }}
-                    >
-                      {normalizeMarkdown(prose)}
-                    </ReactMarkdown>
-                  )}
-
-                  {code !== null ? (
-                    /* Code is streaming — show it live in a styled block */
-                    <StreamingCodeBlock lang={lang} code={code} isDark={isDark} />
-                  ) : (
-                    /* Still in prose — blinking cursor at insertion point */
-                    <span className="inline-block w-0.5 h-[1em] bg-foreground/50 ml-0.5 align-middle animate-pulse" />
-                  )}
-                </>
-              );
-            })()}
-          </div>
         ) : (
           <div className="text-[14.5px] leading-relaxed text-foreground prose-sm">
             <ReactMarkdown
@@ -374,10 +288,6 @@ export const ChatMessage = memo(function ChatMessage({ message, isDark, onOpenAr
                   if (lang === "options") return null;
 
                   if (match) {
-                    // Suppress previewable code — artifact card renders the live
-                    // preview instead. During streaming we match by language alone
-                    // (artifact isn't extracted yet); after streaming we verify
-                    // the content matches so unrelated code blocks still show.
                     if (PREVIEWABLE_LANGS.has(lang)) {
                       if (
                         message.isStreaming ||
@@ -428,7 +338,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isDark, onOpenAr
                   </div>
                 ),
                 thead: ({ children }) => (
-                  <thead className="bg-[oklch(0.945_0.015_74)]">{children}</thead>
+                  <thead className="bg-muted">{children}</thead>
                 ),
                 tbody: ({ children }) => (
                   <tbody className="divide-y divide-border/40">{children}</tbody>
@@ -461,6 +371,9 @@ export const ChatMessage = memo(function ChatMessage({ message, isDark, onOpenAr
             >
               {normalizeMarkdown(stripChoiceBlocks(message.content))}
             </ReactMarkdown>
+            {message.isStreaming && (
+              <span className="inline-block w-0.5 h-[1em] bg-foreground/50 ml-0.5 align-middle animate-pulse" />
+            )}
           </div>
         )}
 
@@ -480,7 +393,7 @@ export const ChatMessage = memo(function ChatMessage({ message, isDark, onOpenAr
 
         {/* Artifact preview card */}
         {message.artifact && onOpenArtifact && !message.isStreaming && (
-          <ArtifactCard artifact={message.artifact} onOpen={onOpenArtifact} />
+          <ArtifactCard artifact={message.artifact} onOpen={onOpenArtifact} isDark={isDark} />
         )}
 
         {/* Action row — visible on hover */}

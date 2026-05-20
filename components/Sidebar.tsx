@@ -126,7 +126,7 @@ export function Sidebar({
 
           {/* ── Search ── */}
           <div className="px-3 pb-3">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/60 border border-sidebar-border">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/60 border border-sidebar-border">
               <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <input
                 type="text"
@@ -257,7 +257,7 @@ function ChatItem({
       className={cn(
         "group flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-colors",
         isActive
-          ? "bg-white shadow-sm border border-sidebar-border/60 text-foreground"
+          ? "bg-card shadow-sm border border-sidebar-border/60 text-foreground"
           : "text-foreground/75 hover:bg-sidebar-accent hover:text-foreground"
       )}
     >

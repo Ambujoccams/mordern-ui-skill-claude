@@ -45,7 +45,7 @@ export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.18 + i * 0.04 }}
             onClick={() => onSelect(prompt)}
-            className="text-left px-4 py-3.5 rounded-xl bg-white border border-border hover:border-primary/40 hover:shadow-sm transition-all text-[13.5px] text-foreground/80 hover:text-foreground group"
+            className="text-left px-4 py-3.5 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all text-[13.5px] text-foreground/80 hover:text-foreground group"
           >
             <span className="line-clamp-1">{prompt}</span>
           </motion.button>

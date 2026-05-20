@@ -68,7 +68,7 @@ function LivePreview({ code, language }: LivePreviewProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-[oklch(0.978_0.007_78)] shrink-0">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-background shrink-0">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
           <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
@@ -86,7 +86,7 @@ function LivePreview({ code, language }: LivePreviewProps) {
         key={key}
         srcDoc={html}
         sandbox="allow-scripts"
-        className="flex-1 w-full border-0 bg-white"
+        className="flex-1 w-full border-0 bg-background"
         title="Live Preview"
       />
     </div>
@@ -138,13 +138,13 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-lg px-3.5 py-2.5 text-[12px]">
-      {label && <p className="font-semibold text-slate-700 mb-2">{label}</p>}
+    <div className="rounded-xl border border-border bg-popover shadow-lg px-3.5 py-2.5 text-[12px]">
+      {label && <p className="font-semibold text-foreground mb-2">{label}</p>}
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2 py-0.5">
           <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: p.color }} />
-          <span className="text-slate-500">{p.name}</span>
-          <span className="font-semibold text-slate-800 ml-auto pl-4">{p.value.toLocaleString()}</span>
+          <span className="text-muted-foreground">{p.name}</span>
+          <span className="font-semibold text-foreground ml-auto pl-4">{p.value.toLocaleString()}</span>
         </div>
       ))}
     </div>
@@ -202,9 +202,9 @@ function DataChart({ content }: DataChartProps) {
   ];
 
   return (
-    <div className="mt-5 rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+    <div className="mt-5 rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
       {/* Header — legend left, type-switcher right */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-3 flex-wrap">
           {valueKeys.map((key, i) => (
             <div key={key} className="flex items-center gap-1.5">
@@ -212,19 +212,19 @@ function DataChart({ content }: DataChartProps) {
                 className="w-3 h-3 rounded-sm shrink-0"
                 style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
               />
-              <span className="text-[12px] font-medium text-slate-600">{key}</span>
+              <span className="text-[12px] font-medium text-muted-foreground">{key}</span>
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5 shrink-0">
+        <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5 shrink-0">
           {typeButtons.map(({ type, icon, label }) => (
             <button
               key={type}
               onClick={() => setChartType(type)}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                 chartType === type
-                  ? "bg-white shadow text-slate-800"
-                  : "text-slate-400 hover:text-slate-600"
+                  ? "bg-background shadow text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {icon}{label}
@@ -339,7 +339,7 @@ function DataChart({ content }: DataChartProps) {
                 borderColor: `${CHART_COLORS[valueKeys.indexOf(key) % CHART_COLORS.length]}30`,
               }}
             >
-              <p className="text-[10px] text-slate-500 mb-0.5">
+              <p className="text-[10px] text-muted-foreground mb-0.5">
                 {i === 0 ? "Top performer" : i === 1 ? "Runner-up" : "3rd place"}
               </p>
               <p
@@ -348,7 +348,7 @@ function DataChart({ content }: DataChartProps) {
               >
                 {key}
               </p>
-              <p className="text-[10px] text-slate-400 mt-0.5">
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">
                 Leads in {wins} of {rows.length}
               </p>
             </div>
@@ -433,7 +433,7 @@ export function WorkspacePanel({
           animate={{ width: isExpanded ? "100%" : width, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="flex h-full border-l border-border bg-white overflow-hidden shrink-0 relative"
+          className="flex h-full border-l border-border bg-card overflow-hidden shrink-0 relative"
           style={{ width: isExpanded ? "100%" : width }}
         >
           {/* Drag handle */}
@@ -448,7 +448,7 @@ export function WorkspacePanel({
 
           <div className="flex flex-col w-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border shrink-0 bg-[oklch(0.978_0.007_78)]">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border shrink-0 bg-background">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="w-6 h-6 rounded-md bg-primary/12 flex items-center justify-center text-primary shrink-0">
                   {artifact && tabIcon(artifact.type)}
@@ -491,7 +491,7 @@ export function WorkspacePanel({
                 onValueChange={setActiveTab}
                 className="flex-1 flex flex-col overflow-hidden"
               >
-                <TabsList className="rounded-none border-b border-border bg-[oklch(0.978_0.007_78)] h-9 px-4 justify-start gap-0 shrink-0">
+                <TabsList className="rounded-none border-b border-border bg-background h-9 px-4 justify-start gap-0 shrink-0">
                   {artifact.type === "code" ? (
                     <>
                       <TabsTrigger

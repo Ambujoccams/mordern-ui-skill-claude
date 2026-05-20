@@ -55,12 +55,12 @@ export function PromptInput({
   const canSend = !!value.trim() && !isLoading;
 
   return (
-    <div className="px-4 pb-5 pt-2">
+    <div className="px-4 pb-4 pt-2 max-w-4xl mx-auto w-full">
       <motion.div
         initial={{ y: 6, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className={cn(
-          "rounded-2xl border bg-white shadow-sm transition-all duration-150",
+          "rounded-2xl border bg-transparent shadow-sm transition-all duration-150",
           "focus-within:border-primary/50 focus-within:shadow-[0_0_0_3px_oklch(0.61_0.125_38_/_12%)]",
           "border-border"
         )}
@@ -73,7 +73,7 @@ export function PromptInput({
           onKeyDown={handleKey}
           placeholder="Message Claude…"
           className={cn(
-            "min-h-[56px] max-h-[200px] resize-none border-0 bg-transparent shadow-none",
+            "min-h-[60px] max-h-[200px] resize-none border-0 bg-transparent shadow-none",
             "focus-visible:ring-0 text-[14.5px] leading-relaxed",
             "px-4 pt-3.5 pb-2 placeholder:text-muted-foreground/50"
           )}
@@ -82,17 +82,17 @@ export function PromptInput({
         />
 
         {/* Bottom toolbar */}
-        <div className="flex items-center gap-1.5 px-3 pb-3 pt-1">
+        <div className="flex items-center gap-1 px-2.5 pb-2 pt-0.5">
           {/* Attachment + voice */}
           <FileUploadButton onFileSelect={onFileSelect} />
           <Tooltip>
             <TooltipTrigger render={<button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" />}>
-              <Mic className="w-4 h-4" />
+              <Mic className="w-3.5 h-3.5" />
             </TooltipTrigger>
             <TooltipContent side="top">Voice input</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-4 mx-0.5 bg-border" />
+          <Separator orientation="vertical" className="h-3.5 mx-0.5 bg-border" />
 
           {/* Model + Tools */}
           <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
@@ -100,29 +100,29 @@ export function PromptInput({
 
           <div className="flex-1" />
 
-          {/* Send button — Claude-style orange circle */}
+          <p className="text-[10.5px] text-muted-foreground/45 mr-2 hidden sm:block">
+            Claude can make mistakes.
+          </p>
+
+          {/* Send button */}
           <button
             disabled={!canSend}
             onClick={onSubmit}
             className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+              "w-7 h-7 rounded-full flex items-center justify-center transition-all",
               canSend
                 ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             )}
           >
             {isLoading ? (
-              <StopCircle className="w-4 h-4" />
+              <StopCircle className="w-3.5 h-3.5" />
             ) : (
-              <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
+              <ArrowUp className="w-3.5 h-3.5" strokeWidth={2.5} />
             )}
           </button>
         </div>
       </motion.div>
-
-      <p className="text-center text-[11px] text-muted-foreground/60 mt-2">
-        Claude can make mistakes. Please double-check responses.
-      </p>
     </div>
   );
 }

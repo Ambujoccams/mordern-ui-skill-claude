@@ -45,11 +45,11 @@ export function InteractiveChoiceCard({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -6, scale: 0.97 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="mt-3 rounded-2xl border border-border bg-white shadow-md overflow-hidden w-full max-w-md"
+          className="mt-3 rounded-2xl border border-border bg-white shadow-md overflow-hidden w-full"
         >
           {/* Header */}
-          <div className="flex items-start justify-between px-4 pt-4 pb-3 border-b border-border/60">
-            <p className="text-[13.5px] font-semibold text-foreground leading-snug pr-4">
+          <div className="flex items-start justify-between px-5 pt-5 pb-4 border-b border-border/60">
+            <p className="text-[15px] font-semibold text-foreground leading-snug pr-4">
               {question}
             </p>
             <button
@@ -61,7 +61,7 @@ export function InteractiveChoiceCard({
           </div>
 
           {/* Choices */}
-          <div className="py-1">
+          <div className="py-1.5">
             {choices.map((choice, i) => {
               const isSelected = selected === choice;
               const isOther = selected && !isSelected;
@@ -71,7 +71,7 @@ export function InteractiveChoiceCard({
                   onClick={() => handleSelect(choice)}
                   disabled={!!selected}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all",
+                    "w-full flex items-center gap-4 px-5 py-3.5 text-left transition-all",
                     "disabled:cursor-default",
                     isSelected
                       ? "bg-primary/8 text-primary"
@@ -83,17 +83,17 @@ export function InteractiveChoiceCard({
                   {/* Number badge */}
                   <span
                     className={cn(
-                      "w-5 h-5 rounded-md text-[11px] font-semibold flex items-center justify-center shrink-0 transition-colors",
+                      "w-7 h-7 rounded-lg text-[12px] font-semibold flex items-center justify-center shrink-0 transition-colors",
                       isSelected
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {isSelected ? <Check className="w-3 h-3" /> : i + 1}
+                    {isSelected ? <Check className="w-3.5 h-3.5" /> : i + 1}
                   </span>
-                  <span className="text-[13px] flex-1">{choice}</span>
+                  <span className="text-[14px] flex-1">{choice}</span>
                   {!selected && (
-                    <CornerDownLeft className="w-3.5 h-3.5 text-muted-foreground/0 group-hover:text-muted-foreground/60 transition-colors" />
+                    <CornerDownLeft className="w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors" />
                   )}
                 </button>
               );
@@ -102,8 +102,8 @@ export function InteractiveChoiceCard({
 
           {/* Free-text fallback */}
           {!selected && (
-            <div className="px-3 pb-3 pt-1 border-t border-border/60">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/40 border border-border/50 focus-within:border-primary/40 focus-within:bg-white transition-all">
+            <div className="px-4 pb-4 pt-2 border-t border-border/60">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/40 border border-border/50 focus-within:border-primary/40 focus-within:bg-white transition-all">
                 <span className="text-muted-foreground shrink-0">
                   <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M2 4h12M2 8h8M2 12h10" strokeLinecap="round" />

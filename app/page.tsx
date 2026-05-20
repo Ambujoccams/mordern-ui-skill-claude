@@ -150,6 +150,9 @@ export default function Home() {
 
       // Accumulate streamed text
       let accText = "";
+      // Batch React state updates to once per animation frame (~60fps max)
+      // instead of on every token (can be 100+/sec), eliminating render jank.
+      let rafId: number | null = null;
 
       try {
         const res = await fetch("/api/chat", {
@@ -167,19 +170,23 @@ export default function Home() {
           throw new Error(`API error ${res.status}`);
         }
 
-        // Stream into the thinking placeholder
         for await (const event of readStream(res)) {
           if (event.type === "delta" && event.text) {
             accText += event.text;
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.isStreaming ? { ...m, content: accText } : m
-              )
-            );
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.isStreaming ? { ...m, content: accText } : m
+                )
+              );
+              rafId = null;
+            });
           } else if (event.type === "error") {
             throw new Error(event.message ?? "Stream error");
           }
         }
+        if (rafId !== null) cancelAnimationFrame(rafId);
       } catch (err) {
         const errText =
           err instanceof Error ? err.message : "Something went wrong";
@@ -218,10 +225,8 @@ export default function Home() {
         )
       );
 
-      // Auto-open workspace if artifact found
       if (artifact) {
         setActiveArtifact(artifact);
-        setWorkspaceOpen(true);
       }
     },
     [isLoading, activeChatId, selectedModel]
